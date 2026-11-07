@@ -1,0 +1,46 @@
+/* Smoke Finder — dark "Nocturne" tokens, ported from the Claude Design doc. */
+:root {
+  --sf-accent: #ff4d2e;
+  --sf-accent-hover: #ff7a5e;
+
+  --color-bg: #161826;
+  --color-surface: #232532;
+  --color-field: #292b31;
+  --color-text: #e9e9ed;
+  --color-divider: rgba(233, 233, 237, 0.16);
+
+  --color-neutral-100: #f3f5fe;
+  --color-neutral-300: #cfd3e5;
+  --color-neutral-400: #b2b6ca;
+  --color-neutral-500: #9397ab;
+  --color-neutral-600: #75798c;
+  --color-neutral-700: #595d6c;
+  --color-neutral-800: #3f424d;
+  --color-neutral-900: #292b31;
+
+  --color-ok: #7fbfa0;
+  --color-error: #d2725f;
+
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  --shadow-sm: 0 0 0 1px var(--color-neutral-800);
+  --shadow-md: 0 0 0 1px var(--color-neutral-700), 0 6px 18px rgba(0, 0, 0, 0.55);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes sf-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 46, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 77, 46, 0); }
+}
+
+@keyframes sf-smoke {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}

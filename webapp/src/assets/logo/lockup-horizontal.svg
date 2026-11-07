@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="60" viewBox="0 0 220 60">
+  <g transform="translate(0,10) scale(0.55)">
+    <path d="M27 5 C41 16 12 25 26 39" stroke="#FF4D2E" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <rect x="21" y="43" width="10" height="7" rx="2" fill="#e9e9ed"/>
+    <rect x="17" y="50" width="18" height="27" rx="6" stroke="#e9e9ed" stroke-width="4" fill="none"/>
+  </g>
+  <text x="48" y="30" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="20" letter-spacing="1" fill="#e9e9ed">SMOKE</text>
+  <line x1="48" y1="36" x2="118" y2="36" stroke="#FF4D2E" stroke-width="2.5"/>
+  <text x="118" y="48" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="10.5" letter-spacing="3.5" fill="#9397ab" text-anchor="end">FINDER</text>
+</svg>

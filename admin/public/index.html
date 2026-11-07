@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smoke Finder — Local Admin</title>
+<style>
+  :root {
+    --bg: #161826; --surface: #232532; --field: #292b31; --text: #e9e9ed;
+    --muted: #9397ab; --divider: rgba(233,233,237,.16); --accent: #ff4d2e;
+    --ok: #7fbfa0; --error: #d2725f; --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system, Segoe UI, Inter, sans-serif; }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 16px; margin: 0; }
+  header .badge { font: 600 10px monospace; padding: 3px 7px; border-radius: 4px; background: var(--surface); color: var(--muted); border: 1px solid var(--divider); }
+  nav { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid var(--divider); }
+  nav button { background: transparent; border: none; color: var(--muted); padding: 10px 16px; font: 600 13px inherit; cursor: pointer; border-bottom: 2px solid transparent; }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+  main { padding: 20px 24px 60px; max-width: 960px; margin: 0 auto; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  input, select { background: var(--field); border: 1px solid var(--divider); border-radius: var(--radius); padding: 8px 10px; color: var(--text); font: inherit; }
+  input[type=checkbox] { width: auto; }
+  label.check { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+  button.btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: var(--radius); padding: 8px 14px; font: 600 12px inherit; cursor: pointer; }
+  button.btn.danger { border-color: var(--error); color: var(--error); }
+  button.btn.ok { border-color: var(--ok); color: var(--ok); }
+  .list-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 6px; }
+  .list-item.inactive { opacity: .5; }
+  .list-item .main { flex: 1; min-width: 0; }
+  .list-item .title { font-weight: 600; }
+  .list-item .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .tag { font: 600 10px monospace; padding: 2px 6px; border-radius: 4px; }
+  .tag.error { background: rgba(210,114,95,.15); color: var(--error); }
+  .empty { color: var(--muted); text-align: center; padding: 24px; }
+  .order-items { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  select.status { background: var(--field); border: 1px solid var(--divider); border-radius: 6px; color: var(--text); padding: 4px 8px; font: 600 11px inherit; }
+  .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .folder {
+    background: var(--surface); border-radius: var(--radius); padding: 16px 14px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px; border: 1px solid transparent;
+  }
+  .folder:hover { border-color: var(--accent); }
+  .folder .icon { font-size: 22px; }
+  .folder .name { font-weight: 600; font-size: 13px; }
+  .folder .count { color: var(--muted); font-size: 11px; }
+  .variant-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .variant-row input[type=text] { flex: 1; min-width: 0; }
+  .variant-row input[type=number] { width: 70px; }
+  .variant-row button { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px 8px; }
+  .variant-row button:hover { color: var(--error); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Smoke Finder — Local Admin</h1>
+  <span class="badge">127.0.0.1 only</span>
+</header>
+<nav>
+  <button data-tab="products" class="active">Товары</button>
+  <button data-tab="orders">Заказы</button>
+  <button data-tab="users">Пользователи</button>
+  <button data-tab="addresses">Адреса</button>
+  <button data-tab="wishlist">Желаемое</button>
+</nav>
+<main>
+  <section id="tab-products" class="tab active">
+    <div class="card">
+      <div class="row">
+        <input id="p-name" placeholder="Название" style="flex:2" />
+        <select id="p-category">
+          <option value="disposables">disposables</option>
+          <option value="liquids">liquids</option>
+          <option value="pods">pods</option>
+          <option value="accessories">accessories</option>
+        </select>
+        <input id="p-price" placeholder="Цена ($)" inputmode="decimal" style="width:110px" />
+      </div>
+      <div class="row">
+        <input id="p-flavour" placeholder="Вкус (опц.)" />
+        <input id="p-nicotine" placeholder="Никотин, мг" inputmode="numeric" value="20" style="width:120px" />
+        <input id="p-qty" placeholder="Количество, шт" inputmode="numeric" style="width:130px" />
+        <label class="check"><input type="checkbox" id="p-best" /> Хит продаж</label>
+        <label class="check"><input type="checkbox" id="p-new" /> Новинка</label>
+      </div>
+      <div class="row">
+        <input id="p-image" type="file" accept="image/*" />
+      </div>
+      <div id="p-error" style="color:var(--error);font-size:12px;margin-bottom:8px;display:none"></div>
+      <button class="btn" id="p-add">Добавить товар</button>
+    </div>
+
+    <div id="edit-panel" class="card" style="display:none">
+      <div style="font-weight:600;margin-bottom:10px">Редактирование: <span id="edit-name-label"></span></div>
+      <div class="row">
+        <input id="e-name" placeholder="Название" style="flex:2" />
+        <select id="e-category">
+          <option value="disposables">disposables</option>
+          <option value="liquids">liquids</option>
+          <option value="pods">pods</option>
+          <option value="accessories">accessories</option>
+        </select>
+        <input id="e-price" placeholder="Цена ($)" inputmode="decimal" style="width:110px" />
+        <input id="e-cost" placeholder="Закуп ($)" inputmode="decimal" style="width:110px" />
+        <input id="e-points-price" placeholder="Цена в баллах" inputmode="numeric" style="width:120px" title="Пусто = нельзя купить за баллы" />
+      </div>
+      <div class="row">
+        <input id="e-flavour" placeholder="Вкус (опц.)" />
+        <input id="e-nicotine" placeholder="Никотин, мг" inputmode="numeric" style="width:120px" />
+        <input id="e-qty" placeholder="Количество, шт" inputmode="numeric" style="width:130px" />
+        <input id="e-brand" placeholder="Бренд" style="width:150px" />
+        <label class="check"><input type="checkbox" id="e-best" /> Хит продаж</label>
+        <label class="check"><input type="checkbox" id="e-new" /> Новинка</label>
+      </div>
+      <div class="row">
+        <input id="e-image" type="file" accept="image/*" />
+      </div>
+      <div class="row" style="flex-direction:column;align-items:stretch">
+        <label style="color:var(--muted);font-size:11px;margin-bottom:3px">Описание — English</label>
+        <textarea id="e-desc-en" rows="2" style="background:var(--field);border:1px solid var(--divider);border-radius:var(--radius);padding:8px 10px;color:var(--text);font:inherit;resize:vertical"></textarea>
+      </div>
+      <div class="row" style="flex-direction:column;align-items:stretch">
+        <label style="color:var(--muted);font-size:11px;margin-bottom:3px">Опис — Українська</label>
+        <textarea id="e-desc-uk" rows="2" style="background:var(--field);border:1px solid var(--divider);border-radius:var(--radius);padding:8px 10px;color:var(--text);font:inherit;resize:vertical"></textarea>
+      </div>
+      <div class="row" style="flex-direction:column;align-items:stretch">
+        <label style="color:var(--muted);font-size:11px;margin-bottom:3px">Описание — Русский</label>
+        <textarea id="e-desc-ru" rows="2" style="background:var(--field);border:1px solid var(--divider);border-radius:var(--radius);padding:8px 10px;color:var(--text);font:inherit;resize:vertical"></textarea>
+      </div>
+
+      <div class="row" id="e-qty-row">
+        <label style="color:var(--muted);font-size:11px;display:flex;align-items:center;gap:6px">Количество, шт
+          <input id="e-qty" placeholder="Количество, шт" inputmode="numeric" style="width:110px" />
+        </label>
+      </div>
+
+      <div class="row" style="align-items:center">
+        <label style="color:var(--muted);font-size:11px">Тип вариантов:</label>
+        <select id="e-variant-type" style="width:140px">
+          <option value="flavour">Вкус</option>
+          <option value="colour">Цвет</option>
+          <option value="ohm">Ом</option>
+        </select>
+        <span id="e-qty-total" style="color:var(--muted);font-size:11px"></span>
+      </div>
+      <div id="e-variants-list" style="margin-bottom:8px"></div>
+      <div class="row">
+        <button class="btn" id="e-variant-add" type="button">+ Добавить вариант</button>
+      </div>
+
+      <div id="e-error" style="color:var(--error);font-size:12px;margin-bottom:8px;display:none"></div>
+      <div class="row">
+        <button class="btn" id="e-save">Сохранить</button>
+        <button class="btn danger" id="e-cancel">Отмена</button>
+      </div>
+    </div>
+
+    <div id="folder-bar" class="row" style="display:none;align-items:center">
+      <button class="btn" id="folder-back">← Все бренды</button>
+      <div id="folder-title" style="font-weight:600"></div>
+      <input id="p-search" placeholder="Поиск в папке…" style="flex:1;min-width:160px" />
+    </div>
+    <div id="products-list"></div>
+  </section>
+
+  <section id="tab-orders" class="tab">
+    <div id="orders-list"></div>
+  </section>
+
+  <section id="tab-users" class="tab">
+    <div id="users-list"></div>
+  </section>
+
+  <section id="tab-addresses" class="tab">
+    <div id="addresses-list"></div>
+  </section>
+
+  <section id="tab-wishlist" class="tab">
+    <div id="wishlist-list"></div>
+    <div id="wishlist-total" style="text-align:center;padding:16px;font:700 14px var(--font-heading);color:var(--muted)"></div>
+  </section>
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const fmt = (cents) => `$${(cents / 100).toFixed(2)}`;
+// Images are uploaded here but served by the bot's own process (port 8787) —
+// that's the origin the webapp/Telegram actually load them from.
+const BOT_ORIGIN = "https://your-bot-url.example.com";
+
+async function api(path, opts) {
+  // Fastify rejects any request with Content-Type: application/json but an
+  // empty body (FST_ERR_CTP_EMPTY_JSON_BODY) — only set it when there's a body.
+  const headers = { ...(opts && opts.headers) };
+  if (opts && opts.body) headers["Content-Type"] = "application/json";
+  const res = await fetch(path, { ...opts, headers });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text().catch(() => "")}`);
+  if (res.status === 204) return undefined;
+  return res.json();
+}
+
+// ---------- tabs ----------
+document.querySelectorAll("nav button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+  });
+});
+
+// ---------- products ----------
+let allProducts = [];
+let currentFolder = null; // null = folder list; "" = "no brand"; otherwise a brand name
+const NO_BRAND = "__no_brand__";
+
+function renderFolders() {
+  $("#folder-bar").style.display = "none";
+  const el = $("#products-list");
+  const counts = new Map();
+  for (const p of allProducts) {
+    const key = p.brand || NO_BRAND;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  const keys = [...counts.keys()].sort((a, b) => {
+    if (a === NO_BRAND) return -1;
+    if (b === NO_BRAND) return 1;
+    return a.localeCompare(b);
+  });
+  const grid = document.createElement("div");
+  grid.className = "folder-grid";
+  for (const key of keys) {
+    const folder = document.createElement("div");
+    folder.className = "folder";
+    const label = key === NO_BRAND ? "Без бренда (мои товары)" : key;
+    folder.innerHTML = `<div class="icon">📁</div><div class="name">${label}</div><div class="count">${counts.get(key)} товаров</div>`;
+    folder.addEventListener("click", () => {
+      currentFolder = key;
+      renderProducts();
+    });
+    grid.appendChild(folder);
+  }
+  el.innerHTML = "";
+  el.appendChild(grid);
+}
+
+function renderProducts() {
+  if (currentFolder === null) {
+    renderFolders();
+    return;
+  }
+  $("#folder-bar").style.display = "flex";
+  $("#folder-title").textContent = currentFolder === NO_BRAND ? "Без бренда (мои товары)" : currentFolder;
+
+  const el = $("#products-list");
+  const q = $("#p-search").value.trim().toLowerCase();
+  const inFolder = allProducts.filter((p) => (p.brand || NO_BRAND) === currentFolder);
+  const filtered = inFolder.filter((p) => !q || p.name.toLowerCase().includes(q));
+  el.innerHTML = "";
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty">Ничего не найдено</div>';
+    return;
+  }
+  for (const p of filtered) {
+    const item = document.createElement("div");
+    item.className = "list-item" + (p.active ? "" : " inactive");
+    const qtyLabel = p.stockCount == null ? "" : ` · ${p.stockCount} шт`;
+    const costLabel = p.costCents != null ? ` · закуп ${fmt(p.costCents)}` : "";
+    item.innerHTML = `
+      ${p.imageUrl ? `<img src="${BOT_ORIGIN}${p.imageUrl}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex:none" />` : `<div style="width:44px;height:44px;border-radius:6px;background:var(--field);flex:none"></div>`}
+      <div class="main" style="cursor:pointer">
+        <div class="title">${p.name} ${!p.active ? '<span class="tag error">удалён</span>' : ""}</div>
+        <div class="sub">${p.category} · ${fmt(p.priceCents)}${p.flavour ? " · " + p.flavour : ""} · ${p.nicotineMg}mg · ${p.stockState}${qtyLabel}${costLabel}</div>
+      </div>
+      <button class="btn ${p.active ? "danger" : "ok"}" data-id="${p.id}" data-active="${p.active}">${p.active ? "Удалить" : "Восстановить"}</button>
+    `;
+    item.querySelector(".main").addEventListener("click", () => openEditPanel(p));
+    item.querySelector("button").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = e.target.dataset.id;
+      const active = e.target.dataset.active === "true";
+      try {
+        await api(`/api/products/${id}${active ? "" : "/restore"}`, { method: active ? "DELETE" : "POST" });
+      } catch (err) {
+        alert("Ошибка: " + err.message);
+        return;
+      }
+      loadProducts();
+    });
+    el.appendChild(item);
+  }
+}
+
+async function loadProducts() {
+  allProducts = await api("/api/products");
+  renderProducts();
+}
+
+$("#p-search").addEventListener("input", renderProducts);
+$("#folder-back").addEventListener("click", () => {
+  currentFolder = null;
+  $("#p-search").value = "";
+  renderProducts();
+});
+
+let editingId = null;
+let editingVariants = []; // {id?, name, stockCount, soldOut, descriptionEn, descriptionUk, descriptionRu}
+
+function renderVariants() {
+  const el = $("#e-variants-list");
+  el.innerHTML = "";
+  let total = 0;
+  editingVariants.forEach((v, i) => {
+    total += Number(v.stockCount) || 0;
+    const row = document.createElement("div");
+    row.className = "variant-row";
+    row.innerHTML = `
+      <input type="text" value="${v.name.replace(/"/g, "&quot;")}" placeholder="Название варианта" />
+      <input type="number" value="${v.stockCount ?? 0}" min="0" placeholder="шт" />
+      <button type="button" title="Удалить">×</button>
+    `;
+    const [nameInput, qtyInput, delBtn] = row.querySelectorAll("input,button");
+    nameInput.addEventListener("input", () => (editingVariants[i].name = nameInput.value));
+    qtyInput.addEventListener("input", () => {
+      editingVariants[i].stockCount = Number(qtyInput.value) || 0;
+      $("#e-qty-total").textContent = `Итого по вариантам: ${editingVariants.reduce((s, v) => s + (Number(v.stockCount) || 0), 0)} шт`;
+    });
+    delBtn.addEventListener("click", () => {
+      editingVariants.splice(i, 1);
+      renderVariants();
+    });
+    el.appendChild(row);
+  });
+  // Only ohm/colour variants track real per-unit stock — flavours never had
+  // per-flavour counts, so their products keep using the top-level qty field
+  // even once flavour chips exist.
+  const tracksStock = $("#e-variant-type").value === "colour" || $("#e-variant-type").value === "ohm";
+  const showTotal = editingVariants.length > 0 && tracksStock;
+  $("#e-qty-total").textContent = showTotal ? `Итого по вариантам: ${total} шт` : "";
+  $("#e-qty-row").style.display = showTotal ? "none" : "flex";
+}
+$("#e-variant-type").addEventListener("change", renderVariants);
+
+$("#e-variant-add").addEventListener("click", () => {
+  editingVariants.push({ name: "", stockCount: 0, soldOut: false, descriptionEn: null, descriptionUk: null, descriptionRu: null });
+  renderVariants();
+});
+
+async function openEditPanel(p) {
+  editingId = p.id;
+  $("#edit-name-label").textContent = p.name;
+  $("#e-name").value = p.name;
+  $("#e-category").value = p.category;
+  $("#e-price").value = (p.priceCents / 100).toFixed(2);
+  $("#e-cost").value = p.costCents != null ? (p.costCents / 100).toFixed(2) : "";
+  $("#e-points-price").value = p.pointsPrice != null ? p.pointsPrice : "";
+  $("#e-flavour").value = p.flavour || "";
+  $("#e-nicotine").value = p.nicotineMg ?? 0;
+  $("#e-qty").value = p.stockCount ?? 0;
+  $("#e-brand").value = p.brand || "";
+  $("#e-best").checked = !!p.bestSeller;
+  $("#e-new").checked = !!p.isNew;
+  $("#e-image").value = "";
+  $("#e-desc-en").value = p.descriptionEn || "";
+  $("#e-desc-uk").value = p.descriptionUk || "";
+  $("#e-desc-ru").value = p.descriptionRu || "";
+  $("#e-variant-type").value = p.variantLabel || "flavour";
+  $("#e-error").style.display = "none";
+  $("#edit-panel").style.display = "block";
+  $("#edit-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+
+  editingVariants = [];
+  renderVariants();
+  try {
+    const variants = await api(`/api/products/${p.id}/variants`);
+    if (editingId === p.id) {
+      editingVariants = variants.map((v) => ({ ...v }));
+      renderVariants();
+    }
+  } catch (err) {
+    console.error("Не удалось загрузить варианты:", err);
+  }
+}
+
+$("#e-cancel").addEventListener("click", () => {
+  editingId = null;
+  editingVariants = [];
+  $("#edit-panel").style.display = "none";
+});
+
+$("#e-save").addEventListener("click", async () => {
+  if (!editingId) return;
+  const name = $("#e-name").value.trim();
+  const priceCents = Math.round(Number($("#e-price").value) * 100);
+  const errorEl = $("#e-error");
+  if (!name || !priceCents || priceCents <= 0) {
+    errorEl.textContent = "Укажите название и цену";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  try {
+    const imageFile = $("#e-image").files[0];
+    const imageBase64 = imageFile ? await fileToBase64(imageFile) : undefined;
+    const savingId = editingId;
+    const validVariants = editingVariants.filter((v) => v.name.trim());
+    await api(`/api/products/${savingId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        name,
+        category: $("#e-category").value,
+        priceCents,
+        flavour: $("#e-flavour").value.trim() || null,
+        nicotineMg: Number($("#e-nicotine").value) || 0,
+        stockCount: validVariants.length ? undefined : Number($("#e-qty").value) || 0,
+        brand: $("#e-brand").value.trim() || null,
+        costCents: $("#e-cost").value.trim() ? Math.round(Number($("#e-cost").value) * 100) : null,
+        pointsPrice: $("#e-points-price").value.trim() ? Math.round(Number($("#e-points-price").value)) : null,
+        bestSeller: $("#e-best").checked,
+        isNew: $("#e-new").checked,
+        descriptionEn: $("#e-desc-en").value.trim() || null,
+        descriptionUk: $("#e-desc-uk").value.trim() || null,
+        descriptionRu: $("#e-desc-ru").value.trim() || null,
+        variantLabel: $("#e-variant-type").value,
+        imageBase64,
+        imageFileName: imageFile ? imageFile.name : undefined,
+      }),
+    });
+    await api(`/api/products/${savingId}/variants`, {
+      method: "PUT",
+      body: JSON.stringify({ variants: validVariants }),
+    });
+    editingId = null;
+    editingVariants = [];
+    $("#edit-panel").style.display = "none";
+    loadProducts();
+  } catch (err) {
+    errorEl.textContent = "Ошибка: " + err.message;
+    errorEl.style.display = "block";
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+$("#p-add").addEventListener("click", async () => {
+  const name = $("#p-name").value.trim();
+  const priceCents = Math.round(Number($("#p-price").value) * 100);
+  const errorEl = $("#p-error");
+  if (!name || !priceCents || priceCents <= 0) {
+    errorEl.textContent = "Укажите название и цену";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  try {
+    const imageFile = $("#p-image").files[0];
+    const imageBase64 = imageFile ? await fileToBase64(imageFile) : undefined;
+    await api("/api/products", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        category: $("#p-category").value,
+        priceCents,
+        flavour: $("#p-flavour").value.trim() || undefined,
+        nicotineMg: Number($("#p-nicotine").value) || 0,
+        stockCount: Number($("#p-qty").value) || 0,
+        bestSeller: $("#p-best").checked,
+        isNew: $("#p-new").checked,
+        imageBase64,
+        imageFileName: imageFile ? imageFile.name : undefined,
+      }),
+    });
+    $("#p-name").value = "";
+    $("#p-flavour").value = "";
+    $("#p-price").value = "";
+    $("#p-qty").value = "";
+    $("#p-best").checked = false;
+    $("#p-new").checked = false;
+    $("#p-image").value = "";
+    loadProducts();
+  } catch (err) {
+    errorEl.textContent = "Ошибка: " + err.message;
+    errorEl.style.display = "block";
+  }
+});
+
+// ---------- orders ----------
+const STATUSES = ["placed", "accepted", "packed", "ready_pickup", "delivered", "cancelled"];
+
+async function loadOrders() {
+  const orders = await api("/api/orders");
+  const el = $("#orders-list");
+  el.innerHTML = "";
+  if (!orders.length) {
+    el.innerHTML = '<div class="empty">Заказов пока нет</div>';
+    return;
+  }
+  for (const o of orders) {
+    const itemsText = o.items.map((i) => `${i.name}${i.flavour ? " (" + i.flavour + ")" : ""} ×${i.qty}`).join(", ");
+    const who = o.customerUsername ? `@${o.customerUsername}` : o.customerName || o.telegramId;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div><b>#${o.id}</b> · ${who} · ${fmt(o.totalCents)}</div>
+        <select class="status" data-id="${o.id}">
+          ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+      </div>
+      <div class="order-items">${itemsText}</div>
+      <div class="order-items">${o.deliveryMethod === "courier" ? "Курьер → " + (o.address || "-") : "Самовывоз"} · ${o.paymentMethod} · ${o.contactPhone || "-"} · ${new Date(o.createdAt).toLocaleString()}</div>
+      ${
+        o.paymentMethod === "e_transfer"
+          ? `<div class="order-items">Оплата: ${o.paymentConfirmed ? '<span class="tag" style="background:rgba(127,191,160,.15);color:var(--ok)">подтверждена</span>' : o.hasPaymentProof ? '<span class="tag" style="background:rgba(255,77,46,.15);color:var(--accent)">есть скриншот, ждёт проверки</span>' : '<span class="tag error">скриншота ещё нет</span>'}</div>`
+          : ""
+      }
+    `;
+    card.querySelector("select").addEventListener("change", async (e) => {
+      try {
+        await api(`/api/orders/${o.id}/status`, { method: "PATCH", body: JSON.stringify({ status: e.target.value }) });
+      } catch (err) {
+        alert("Ошибка: " + err.message);
+      }
+    });
+    el.appendChild(card);
+  }
+}
+
+// ---------- users ----------
+async function loadUsers() {
+  const users = await api("/api/users");
+  const el = $("#users-list");
+  el.innerHTML = "";
+  if (!users.length) {
+    el.innerHTML = '<div class="empty">Пользователей пока нет</div>';
+    return;
+  }
+  for (const u of users) {
+    const item = document.createElement("div");
+    item.className = "list-item";
+    const rewardTag = u.rewardsAvailable > 0 ? `<span class="tag" style="background:rgba(127,191,160,.15);color:var(--ok)">${u.rewardsAvailable} награда(ы) доступно</span>` : "";
+    item.innerHTML = `
+      <div class="main">
+        <div class="title">${u.firstName || "—"} ${u.username ? "@" + u.username : ""} ${rewardTag}</div>
+        <div class="sub">id ${u.telegramId} · ${u.phone || "телефон не указан"} · ${u.language} · с ${new Date(u.memberSince).toLocaleDateString()}</div>
+        <div class="sub">Приглашено новых: ${u.referralCount} · баллов: <b style="color:var(--accent)">${u.points}</b></div>
+        <div class="sub">заработано наград: ${u.rewardsEarned} · использовано: ${u.rewardsRedeemed}</div>
+        <div class="sub" style="display:flex;align-items:center;gap:6px;margin-top:4px">
+          Личная скидка:
+          <input type="number" min="0" max="100" value="${u.discountPercent || 0}" style="width:60px" class="discount-input" />%
+          <button class="btn" style="padding:3px 10px">Сохранить</button>
+        </div>
+      </div>
+      ${u.rewardsAvailable > 0 ? `<button class="btn ok" data-id="${u.telegramId}">Выдать награду</button>` : ""}
+    `;
+    const rewardBtn = item.querySelector("button.ok");
+    if (rewardBtn) {
+      rewardBtn.addEventListener("click", async () => {
+        try {
+          await api(`/api/users/${u.telegramId}/redeem-reward`, { method: "POST" });
+          loadUsers();
+        } catch (err) {
+          alert("Ошибка: " + err.message);
+        }
+      });
+    }
+    const discountInput = item.querySelector(".discount-input");
+    const discountBtn = item.querySelector(".discount-input").parentElement.querySelector("button");
+    discountBtn.addEventListener("click", async () => {
+      try {
+        await api(`/api/users/${u.telegramId}/discount`, {
+          method: "PATCH",
+          body: JSON.stringify({ discountPercent: Number(discountInput.value) || 0 }),
+        });
+      } catch (err) {
+        alert("Ошибка: " + err.message);
+      }
+    });
+    el.appendChild(item);
+  }
+}
+
+// ---------- addresses ----------
+async function loadAddresses() {
+  const addresses = await api("/api/addresses");
+  const el = $("#addresses-list");
+  el.innerHTML = "";
+  if (!addresses.length) {
+    el.innerHTML = '<div class="empty">Адресов пока нет</div>';
+    return;
+  }
+  for (const a of addresses) {
+    const who = a.customerUsername ? `@${a.customerUsername}` : a.customerName || a.telegramId;
+    const item = document.createElement("div");
+    item.className = "list-item";
+    item.innerHTML = `
+      <div class="main">
+        <div class="title">${a.address}</div>
+        <div class="sub">${who} · ${new Date(a.createdAt).toLocaleDateString()}</div>
+      </div>
+    `;
+    el.appendChild(item);
+  }
+}
+
+let wishlistUsersById = {};
+
+function wishlistUserPanelRows(telegramId) {
+  const user = wishlistUsersById[telegramId];
+  if (!user) return "";
+  return user.items
+    .map(
+      (it) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--divider)">
+          <span>${it.name}${it.flavour ? ` <span style="color:var(--accent)">· ${it.flavour}</span>` : ""}</span>
+          <span class="paid-toggle" data-item-id="${it.id}" data-telegram-id="${telegramId}" style="cursor:pointer;font:600 11px var(--font-body);color:${it.paid ? "var(--ok)" : "var(--muted)"}">
+            ${it.paid ? "✅ Оплачено" : "Отметить оплаченным"}
+          </span>
+        </div>`
+    )
+    .join("");
+}
+
+function renderWishlistUserPanel(panel, telegramId) {
+  panel.dataset.telegramId = telegramId;
+  panel.style.marginTop = "6px";
+  panel.style.background = "var(--field)";
+  panel.style.borderRadius = "8px";
+  panel.style.padding = "8px 10px";
+  panel.innerHTML = wishlistUserPanelRows(telegramId);
+  panel.querySelectorAll(".paid-toggle").forEach((span) => {
+    span.addEventListener("click", async () => {
+      const itemId = span.dataset.itemId;
+      const user = wishlistUsersById[telegramId];
+      const item = user?.items.find((i) => String(i.id) === itemId);
+      if (!item) return;
+      item.paid = !item.paid;
+      renderWishlistUserPanel(panel, telegramId);
+      try {
+        await api(`/api/wishlist/${itemId}`, { method: "PATCH", body: JSON.stringify({ paid: item.paid }) });
+      } catch (err) {
+        item.paid = !item.paid;
+        renderWishlistUserPanel(panel, telegramId);
+        alert("Ошибка: " + err.message);
+      }
+    });
+  });
+}
+
+async function loadWishlist() {
+  const { byProduct, users } = await api("/api/wishlist");
+  wishlistUsersById = {};
+  for (const u of users) wishlistUsersById[u.telegramId] = u;
+
+  const el = $("#wishlist-list");
+  el.innerHTML = "";
+  if (!byProduct.length) {
+    el.innerHTML = '<div class="empty">Пока никто ничего не добавил в желаемое</div>';
+  } else {
+    for (const w of byProduct) {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.style.flexDirection = "column";
+      item.style.alignItems = "stretch";
+      const wisherSpans = w.wishers
+        .map((p) => `<span class="wisher-link" data-telegram-id="${p.telegramId}" style="cursor:pointer;text-decoration:underline;color:var(--accent)">${p.label}</span>`)
+        .join(", ");
+      item.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="main">
+            <div class="title">${w.name}${w.flavour ? ` <span style="color:var(--accent)">· ${w.flavour}</span>` : ""}</div>
+            ${w.brand ? `<div class="sub">${w.brand}</div>` : ""}
+          </div>
+          <span style="font:700 15px var(--font-heading);color:var(--accent)">${w.count}</span>
+        </div>
+        <div class="sub" style="margin-top:4px">${wisherSpans}</div>
+        <div class="wisher-panel"></div>
+      `;
+      const panel = item.querySelector(".wisher-panel");
+      item.querySelectorAll(".wisher-link").forEach((span) => {
+        span.addEventListener("click", () => {
+          const id = span.dataset.telegramId;
+          if (panel.dataset.telegramId === id) {
+            panel.innerHTML = "";
+            delete panel.dataset.telegramId;
+          } else {
+            renderWishlistUserPanel(panel, id);
+          }
+        });
+      });
+      el.appendChild(item);
+    }
+  }
+  const total = byProduct.reduce((sum, w) => sum + w.count, 0);
+  $("#wishlist-total").textContent = `Всего добавлений в желаемое: ${total}`;
+}
+
+loadProducts();
+loadOrders();
+loadUsers();
+loadAddresses();
+loadWishlist();
+</script>
+</body>
+</html>

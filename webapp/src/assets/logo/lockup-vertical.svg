@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="220" viewBox="0 0 200 220">
+  <g transform="translate(76,8) scale(1.1)">
+    <path d="M27 3 C41 14 12 23 26 37" stroke="#FF4D2E" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M15 12 C24 20 8 26 16 34" stroke="#FF4D2E" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+  </g>
+  <text x="20" y="140" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="34" letter-spacing="1" fill="#e9e9ed">SM</text>
+  <circle cx="83" cy="127" r="18" fill="none" stroke="#e9e9ed" stroke-width="3"/>
+  <rect x="79" y="112" width="8" height="6" rx="2" fill="#FF4D2E"/>
+  <rect x="76" y="118" width="14" height="18" rx="4" fill="none" stroke="#e9e9ed" stroke-width="2"/>
+  <text x="102" y="140" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="34" letter-spacing="1" fill="#e9e9ed">KE</text>
+  <line x1="20" y1="150" x2="170" y2="150" stroke="#e9e9ed" stroke-width="2.5"/>
+  <text x="170" y="172" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="14" letter-spacing="4" fill="#9397ab" text-anchor="end">FINDER</text>
+</svg>

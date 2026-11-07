@@ -1,0 +1,137 @@
+@import "./tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--sf-accent);
+}
+
+button {
+  font-family: inherit;
+}
+
+.sf-app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+}
+
+.sf-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 10px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* Opt-in, used on screens with a hero image right below the header (e.g.
+   Product) — pins the header to the top as the page scrolls, so the image
+   scrolls up underneath it instead of the header scrolling away with it. */
+.sf-header-overlay {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(22, 24, 38, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: none;
+  transition: background-color 0.2s ease;
+}
+
+.sf-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-900);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+}
+
+.sf-header-title {
+  flex: 1;
+  text-align: center;
+}
+
+.sf-header-title .name {
+  font: 500 14px var(--font-heading);
+}
+
+.sf-header-title .sub {
+  font: 400 10px var(--font-body);
+  color: var(--color-neutral-500);
+}
+
+.sf-screen {
+  flex: 1;
+  padding: 14px 14px calc(96px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.sf-bottom-fallback {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 10px 12px calc(10px + var(--safe-bottom));
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-divider);
+}
+
+.sf-main-button {
+  height: 50px;
+  border-radius: var(--radius-md);
+  background: var(--sf-accent);
+  color: #1b0703;
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 15px var(--font-body);
+  cursor: pointer;
+}
+
+.sf-main-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sf-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 10px;
+}
+
+.sf-section-label {
+  font: 600 11.5px var(--font-body);
+  color: var(--color-neutral-500);
+  letter-spacing: 0.08em;
+  margin-bottom: 7px;
+}
